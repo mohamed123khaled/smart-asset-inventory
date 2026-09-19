@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// جدول المستخدمين (الموظفين والمهندسين)
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  role      String   // Admin, Custodian, Technician
+}
+
+// جدول الأماكن (مبنى، دور، غرفة)
+model Location {
+  id        Int      @id @default(autoincrement())
+  name      String
+  type      String   // Campus, Building, Room
+  assets    Asset[]
+}
+
+// جدول الأصول (الأجهزة والمعدات)
+model Asset {
+  id            Int            @id @default(autoincrement())
+  tag           String         @unique // كود الـ QR
+  serial        String?
+  name          String
+  condition     String
+  status        String
+  locationId    Int
+  location      Location       @relation(fields: [locationId], references: [id])
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  history       AssetHistory[]
+}
+
+// جدول سجل الحركات (عشان نسجل مين نقل إيه وإمتى - Audit Trail)
+model AssetHistory {
+  id            Int      @id @default(autoincrement())
+  assetId       Int
+  asset         Asset    @relation(fields: [assetId], references: [id])
+  action        String   // مثلا: "TRANSFER", "MAINTENANCE"
+  actorId       Int      // ID الشخص اللي عمل الحركة
+  timestamp     DateTime @default(now())
+}

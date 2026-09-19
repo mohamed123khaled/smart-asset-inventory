@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  # 1. Database Service (PostgreSQL)
+  db:
+    image: postgres:15-alpine
+    container_name: asset_db
+    restart: always
+    environment:
+      POSTGRES_USER: devhub_user
+      POSTGRES_PASSWORD: devhub_password
+      POSTGRES_DB: smart_asset_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - asset_network
+
+  # 2. Backend Service (Node.js)
+  backend:
+    build: ./backend
+    container_name: asset_backend
+    environment:
+      - DATABASE_URL=postgres://devhub_user:devhub_password@db:5432/smart_asset_db
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    networks:
+      - asset_network
+
+networks:
+  asset_network:
+    driver: bridge
+
+volumes:
+  pgdata: # لحفظ بيانات الداتابيز عشان متضيعش لو الحاوية قفلت
