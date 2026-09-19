@@ -17,7 +17,21 @@ services:
     networks:
       - asset_network
 
-  # 2. Backend Service (Node.js)
+  # 2. AI Service (Python/FastAPI)
+  ai_service:
+    build: ./ai-service
+    container_name: ai_backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./ai-service:/app
+    environment:
+      - ENV=development
+    restart: always
+    networks:            # <-- الإضافة المهمة هنا عشان يكلم الداتابيز والباك إند
+      - asset_network
+
+  # 3. Backend Service (Node.js)
   backend:
     build: ./backend
     container_name: asset_backend
